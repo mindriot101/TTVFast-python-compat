@@ -20,8 +20,7 @@ int kepler_step(double gm, double dt, PhaseState *s0, PhaseState *s,int planet)
   a = 1.0/(2.0/r0 - v0s/gm);
 
   if(a<0.0) {
-    printf("hyperbolic orbit %lf\n", a);
-    exit(-1);
+    PyErr_SetString(PyExc_ValueError, "hyperbolic orbit");
   }
 
   n = sqrt(gm/(a*a*a));
@@ -74,8 +73,8 @@ int kepler_step(double gm, double dt, PhaseState *s0, PhaseState *s,int planet)
   }
 
   if(count==MAX_ITER){
-    printf("Kepler step not converging in MAX_ITER. Likely need a smaller dt\n");
-    exit(-1);
+    PyErr_SetString(PyExc_ValueError,
+            "Kepler step not converging in MAX_ITER. Likely need a smaller dt");
   }
 
   guess[planet][0]=guess[planet][1];

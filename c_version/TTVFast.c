@@ -3,6 +3,8 @@
 
 // Main TTVFast file, which takes in the initial conditions, masses, G, timestep, t0, total amount of time, number of planets, number of RV measurements, size of Transit structure, and the RV and Transit structures. This is where the integration is formed & the transit times, rsky & vsky at transit, and RV at an observation time are calculated. Note that things called "helio" or "heliocentric" really should be "astrocentric". 
 
+#include <Python.h>
+
 #define PI 3.14159265358979323846
 #define TWOPI 6.283185307179586476925287
 #define MAX_N_PLANETS 9
@@ -80,8 +82,7 @@ void TTVFast(double *params,double dt, double Time, double total,int n_plan,Calc
     read_helio_cartesian_params(params);
   }
   if(input_flag !=0 && input_flag !=1 && input_flag !=2){
-    printf("Input flag must be 0,1, or 2. \n");
-    exit(-1);
+    PyErr_SetString(PyExc_ValueError, "Input flag must be 0,1, or 2.");
   }
   
   copy_system(p, rp);
@@ -228,8 +229,8 @@ void TTVFast(double *params,double dt, double Time, double total,int n_plan,Calc
 	  count[tplanet]++;
 	  k++;
 	}else{
-	  printf("Not enough memory allocated for Transit structure: more events triggering as transits than expected. Possibily indicative of larger problem.\n");
-	  exit(-1);
+	  PyErr_SetString(PyExc_MemoryError,
+              "Not enough memory allocated for Transit structure: more events triggering as transits than expected. Possibily indicative of larger problem.");
 	}
       }
       
@@ -288,8 +289,7 @@ read_jacobi_planet_elements(params)
     planet += 1;
 
     if(planet > MAX_N_PLANETS) {
-      printf("too many planets: %d\n", planet);
-      exit(-1);
+      PyErr_Format(PyExc_ValueError, "too many planets: %d\n", planet);
     }
   }
 }
@@ -345,8 +345,7 @@ read_helio_planet_elements(params)
     planet += 1;
 
     if(planet > MAX_N_PLANETS) {
-      printf("too many planets: %d\n", planet);
-      exit(-1);
+      PyErr_Format(PyExc_ValueError, "too many planets: %d", planet);
     }
   }
   heliocentric_jacobi(helio,p,GMsun,GM);
@@ -399,8 +398,7 @@ double *params;
     planet += 1;
 
     if(planet > MAX_N_PLANETS) {
-      printf("too many planets: %d\n", planet);
-      exit(-1);
+      PyErr_Format(PyExc_ValueError, "too many planets: %d", planet);
     }
   }
   heliocentric_jacobi(helio,p,GMsun,GM);
